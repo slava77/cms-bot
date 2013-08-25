@@ -37,6 +37,8 @@ if __name__ == "__main__":
   last_commit_date = pr.get_commits()[pr.commits - 1].commit.committer.date
   already_seen = False
   pull_request_updated = False
+  test_requests = {}
+
   for comment in issue.get_comments():
     comment_date = comment.created_at
     commenter = comment.user.login
@@ -73,8 +75,13 @@ if __name__ == "__main__":
           continue
         for sign in CMSSW_L2[actor.group(1)]:
           signatures[sign] = "rejected"
+      
+      actor = re.match("^Hi, [@]([^ ]+) I'm now testing this pull request for you."):
+      if actor:
+        test_requested.update({actor.group(1), "acknowledged"})
 
-
+    # The commenter is one of the L2s. Handle their signatures or their
+    # requests for tests.
     if commenter in CMSSW_L2:
       if not [x for x in CMSSW_L2[commenter] if x in signing_categories]:
         continue
@@ -88,8 +95,10 @@ if __name__ == "__main__":
       if re.match("^hold$", first_line):
         for sign in CMSSW_L2[commenter]:
           signatures[sign] = "pending"
-        
+      if re.match("@cmsbuild[ ]+(test|please test)$") not test_requested:
+        test_requested.update({commenter: "requested"})
 
+  # Calculate the labels.
   print "The labels of the pull request should be:"
   labels = [x + "-pending" for x in signing_categories]
   for category, value in signatures.items():
@@ -170,3 +179,5 @@ if __name__ == "__main__":
       pr.create_issue_comment(msg)
   else:
     print "Already notified L2 about " + str(pr.number)
+
+  # Finally check if 
