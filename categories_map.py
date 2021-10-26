@@ -1131,7 +1131,6 @@ CMSSW_CATEGORIES = {
     "EventFilter/SiPixelRawToDigi",
     "EventFilter/SiStripRawToDigi",
     "EventFilter/TotemRawToDigi",
-    "EventFilter/Utilities",
     "JetMETCorrections/Configuration",
     "JetMETCorrections/JetCorrector",
     "JetMETCorrections/Modules",
